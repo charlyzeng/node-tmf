@@ -1,107 +1,104 @@
 /* eslint-disable no-param-reassign */
-const $tfmSpyFlagMap = new Map();
-const $tfmSpyInfoMap = new Map();
+(function () {
+  const flagMap = new Map();
 
-const $tfmSpyFlagKey = '__tfmSpyFlag';
-const $tfmSpyInfoKey = '__tfmSpyInfo';
-const $tfmMockKey = '__tfmMock';
+  const mockKey = '__tfmMock';
+  const spyFlagKey = '__tfmSpyFlag';
+  const spyInfoKey = '__tfmSpyInfo';
 
-const { defineProperty } = Object;
-Object.defineProperty = function (target, prop, descriptor) {
-  return defineProperty.call(Object, target, prop, {
-    ...descriptor,
-    enumerable: true,
-  });
-};
+  function isFunction(target) {
+    return typeof target === 'function';
+  }
 
-function isFunction(target) {
-  return typeof target === 'function';
-}
+  function isObject(target) {
+    return typeof target === 'object' && target !== null;
+  }
 
-function isObject(target) {
-  return typeof target === 'object' && target !== null;
-}
+  function getInitSpyInfo(target) {
+    return {
+      called: true,
+      callCount: 0,
+      callArgs: [],
+      lastCallArgs: [],
+      returnValues: [],
+      lastReturnValue: undefined,
+      restore() {
+        flagMap.delete(target);
+        delete target[spyInfoKey];
+        delete target[mockKey];
+      },
+    };
+  }
 
-function getInitSpyInfo(target) {
-  return {
-    called: true,
-    callCount: 0,
-    callArgs: [],
-    lastCallArgs: [],
-    returnValues: [],
-    lastReturnValue: undefined,
-    restore() {
-      $tfmSpyFlagMap.delete(target);
-      delete target[$tfmSpyInfoKey];
-      delete target[$tfmMockKey];
-    },
-  };
-}
+  function wrapFunc(func) {
+    return new Proxy(func, {
+      apply(target, thisArg, args) {
+        const mockFunc = target[mockKey];
+        const funcToCall = mockFunc || target;
 
-function $tfmWrapFunc(func) {
-  return new Proxy(func, {
-    apply(target, thisArg, args) {
-      const mockFunc = target[$tfmMockKey];
-      const funcToCall = mockFunc || target;
+        const returnValue = funcToCall.apply(thisArg, args);
+        const isSpied = flagMap.get(target);
+        if (isSpied) {
+          const spyInfo = target[spyInfoKey];
+          spyInfo.callCount += 1;
+          spyInfo.callArgs.push(args);
+          spyInfo.lastCallArgs = args;
+          spyInfo.returnValues.push(returnValue);
+          spyInfo.lastReturnValue = returnValue;
+        }
 
-      const returnValue = funcToCall.apply(thisArg, args);
-      const isSpied = $tfmSpyFlagMap.get(target);
-      if (isSpied) {
-        const spyInfo = target[$tfmSpyInfoKey];
-        spyInfo.callCount += 1;
-        spyInfo.callArgs.push(args);
-        spyInfo.lastCallArgs = args;
-        spyInfo.returnValues.push(returnValue);
-        spyInfo.lastReturnValue = returnValue;
+        return returnValue;
+      },
+      set(target, prop, value) {
+        if (prop === spyFlagKey && value === true) {
+          flagMap.set(target, true);
+          Object.defineProperty(target, spyInfoKey, {
+            value: getInitSpyInfo(target),
+            configurable: true,
+          });
+        } else if (prop === mockKey && isFunction(value)) {
+          flagMap.set(target, true);
+          Object.defineProperty(target, mockKey, {
+            value,
+            configurable: true,
+          });
+          Object.defineProperty(target, spyInfoKey, {
+            value: getInitSpyInfo(target),
+            configurable: true,
+          });
+        } else {
+          return Reflect.set(target, prop, value);
+        }
+      },
+    });
+  }
+
+  const MAX_DEPTH = 5; // 最多递归5层
+  function wrapFuncByRecurse(target, depth) {
+    depth = depth || 1;
+    if (depth > MAX_DEPTH) {
+      return;
+    }
+    const keys = Object.keys(target);
+    let key;
+    for (let i = 0; i < keys.length; i += 1) {
+      key = keys[i];
+      if (isFunction(target[key])) {
+        Object.defineProperty(target, key, {
+          value: wrapFunc(target[key]),
+        });
+        wrapFuncByRecurse(target[key], depth + 1);
+      } else if (isObject(target[key])) {
+        wrapFuncByRecurse(target[key], depth + 1);
       }
-
-      return returnValue;
-    },
-    set(target, prop, value) {
-      if (prop === $tfmSpyFlagKey && value === true) {
-        $tfmSpyFlagMap.set(target, true);
-        Object.defineProperty(target, $tfmSpyInfoKey, {
-          value: getInitSpyInfo(target),
-          configurable: true,
-        });
-      } else if (prop === $tfmMockKey && isFunction(value)) {
-        $tfmSpyFlagMap.set(target, true);
-        Object.defineProperty(target, $tfmMockKey, {
-          value,
-          configurable: true,
-        });
-        Object.defineProperty(target, $tfmSpyInfoKey, {
-          value: getInitSpyInfo(target),
-          configurable: true,
-        });
-      } else {
-        return Reflect.set(target, prop, value);
-      }
-    },
-  });
-}
-
-function wrapAllChildFunc(target) {
-  const keys = Object.keys(target);
-  for (let i = 0; i < keys.length; i += 1) {
-    if (isFunction(target[keys[i]])) {
-      Object.defineProperty(target, keys[i], {
-        value: $tfmWrapFunc(target[keys[i]]),
-      });
     }
   }
-}
 
-const out = module.exports;
-if (isFunction(out)) {
-  wrapAllChildFunc(out);
-  module.exports = $tfmWrapFunc(module.exports);
-  Object.defineProperty(module.exports, '__tfmSpyInfoMap', {
-    value: $tfmSpyInfoMap,
-  });
-} else if (isObject(out)) {
-  wrapAllChildFunc(out);
-  Object.defineProperty(module.exports, '__tfmSpyInfoMap', {
-    value: $tfmSpyInfoMap,
-  });
-}
+  const output = module.exports;
+  if (isFunction(output)) {
+    wrapFuncByRecurse(output);
+    module.exports = wrapFunc(output);
+  } else if (isObject(output)) {
+    wrapFuncByRecurse(output);
+  }
+}());
