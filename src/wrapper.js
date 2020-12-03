@@ -1,7 +1,10 @@
+/* eslint-disable no-param-reassign */
 const $tfmSpyFlagMap = new Map();
 const $tfmSpyInfoMap = new Map();
 
-const spyInfoKey = '__tfmSpyInfo';
+const $tfmSpyFlagKey = '__tfmSpyFlag';
+const $tfmSpyInfoKey = '__tfmSpyInfo';
+const $tfmMockKey = '__tfmMock';
 
 const { defineProperty } = Object;
 Object.defineProperty = function (target, prop, descriptor) {
@@ -19,28 +22,32 @@ function isObject(target) {
   return typeof target === 'object' && target !== null;
 }
 
+function getInitSpyInfo(target) {
+  return {
+    called: true,
+    callCount: 0,
+    callArgs: [],
+    lastCallArgs: [],
+    returnValues: [],
+    lastReturnValue: undefined,
+    restore() {
+      $tfmSpyFlagMap.delete(target);
+      delete target[$tfmSpyInfoKey];
+      delete target[$tfmMockKey];
+    },
+  };
+}
+
 function $tfmWrapFunc(func) {
   return new Proxy(func, {
     apply(target, thisArg, args) {
-      const returnValue = target.apply(thisArg, args);
+      const mockFunc = target[$tfmMockKey];
+      const funcToCall = mockFunc || target;
+
+      const returnValue = funcToCall.apply(thisArg, args);
       const isSpied = $tfmSpyFlagMap.get(target);
       if (isSpied) {
-        // const spyInfo = $tfmSpyInfoMap.get(target) || {
-        //   called: true,
-        //   callCount: 0,
-        //   callArgs: [],
-        //   lastCallArgs: [],
-        //   returnValues: [],
-        //   lastReturnValue: undefined,
-        // };
-        // spyInfo.callCount += 1;
-        // spyInfo.callArgs.push(args);
-        // spyInfo.lastCallArgs = args;
-        // spyInfo.returnValues.push(returnValue);
-        // spyInfo.lastReturnValue = returnValue;
-        // $tfmSpyInfoMap.set(target, spyInfo);
-
-        const spyInfo = target[spyInfoKey];
+        const spyInfo = target[$tfmSpyInfoKey];
         spyInfo.callCount += 1;
         spyInfo.callArgs.push(args);
         spyInfo.lastCallArgs = args;
@@ -51,35 +58,20 @@ function $tfmWrapFunc(func) {
       return returnValue;
     },
     set(target, prop, value) {
-      if (prop === '__tfmSpy' && value === true) {
+      if (prop === $tfmSpyFlagKey && value === true) {
         $tfmSpyFlagMap.set(target, true);
-        const spyInfo = {
-          called: true,
-          callCount: 0,
-          callArgs: [],
-          lastCallArgs: [],
-          returnValues: [],
-          lastReturnValue: undefined,
-          restore() {
-            $tfmSpyFlagMap.delete(target);
-          },
-        };
-        Object.defineProperty(target, spyInfoKey, {
-          value: spyInfo,
+        Object.defineProperty(target, $tfmSpyInfoKey, {
+          value: getInitSpyInfo(target),
           configurable: true,
         });
-      } else if (prop === '__tfmSpy' && value === false) {
-        $tfmSpyFlagMap.delete(target);
-      } else if (prop === '__tfmMock' && isFunction(value)) {
+      } else if (prop === $tfmMockKey && isFunction(value)) {
         $tfmSpyFlagMap.set(target, true);
-        Object.defineProperty(target, prop, {
+        Object.defineProperty(target, $tfmMockKey, {
           value,
           configurable: true,
         });
-      } else if (prop === '__tfmMock' && value === null) {
-        $tfmSpyFlagMap.delete(target);
-        Object.defineProperty(target, prop, {
-          value: target,
+        Object.defineProperty(target, $tfmSpyInfoKey, {
+          value: getInitSpyInfo(target),
           configurable: true,
         });
       } else {
