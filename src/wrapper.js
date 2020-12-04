@@ -79,7 +79,12 @@ function $tmfWrapFunc(func) {
   });
 }
 
-const $TMF_MAX_DEPTH = 5; // 最多递归5层
+// 默认最多递归5层
+let $TMF_MAX_DEPTH = 5;
+// 可通过环境变量设置
+if (parseInt(process.env.TMF_MAX_DEPTH, 10) > 0) {
+  $TMF_MAX_DEPTH = parseInt(process.env.TMF_MAX_DEPTH, 10);
+}
 function $tmfWrapFuncByRecurse(target, depth) {
   depth = depth || 1;
   if (depth > $TMF_MAX_DEPTH) {

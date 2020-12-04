@@ -4,7 +4,9 @@
   "description": "test for module in nodejs.",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha -r ./src/inject.js test/**/*.test.js"
+    "test": "npm run test:common && npm run test:spec",
+    "test:common": "mocha -r ./src/inject.js test/**/*.test.js",
+    "test:spec": "mocha -r ./test/mocha.env.js -r ./src/inject.js test/**/*.spec.js"
   },
   "repository": {
     "type": "git",
