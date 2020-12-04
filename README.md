@@ -1,3 +1,23 @@
+- [node-tmf](#node-tmf)
+- [为什么需要](#为什么需要)
+- [示例](#示例)
+- [安装](#安装)
+  - [使用 npm](#使用-npm)
+  - [使用 yarn](#使用-yarn)
+- [使用方法](#使用方法)
+  - [第一步](#第一步)
+  - [第二步](#第二步)
+- [API](#api)
+  - [mock](#mock)
+  - [spy](#spy)
+  - [返回值`SpyInfo`说明](#返回值spyinfo说明)
+- [局限性](#局限性)
+  - [局限一](#局限一)
+  - [局限二](#局限二)
+  - [局限三](#局限三)
+- [原理说明](#原理说明)
+- [结语](#结语)
+
 # node-tmf
 全称 `node test module function`, 指用于在 Node 端对模块导出的函数做单元测试。
 
@@ -124,12 +144,16 @@ $ yarn add node-tmf
 在单元测试代码中，引入 `node-tmf` 模块对目标方法机型 mock 或者 spy. 具体可参考示例。
 
 # API
-## mock(originFunc: function, mockFunction?: function): SpyInfo
+## mock
+> `function(originFunc: Function, mockFunction?: Function): SpyInfo`
+
 `mock` 函数用于将原函数 `originFunc` mock 成指定的 `mockFunction`. 当 `mockFunction` 为空时，则会为期分配一个默认的空函数。空函数的类型自动保持与 `originFunc` 类型一致，即 `Function`, `AsyncFunction`, 或者 `GeneratorFunction`.
 
 返回说明：`mock` 方法返回的 `SpyInfo` 记录着函数的调用情况，具体参数见 [返回值SpyInfo说明](#返回值)
 
-## spy(targetFunc: function): SpyInfo
+## spy
+> `function(targetFunc: Function): SpyInfo`
+
 `spy` 函数用于监听并收集目标函数 `targetFunc` 的执行信息，只是充当一个间谍函数。也就是说，原本的目标函数 `targetFunc` 逻辑仍然会被执行（mock 的则不会）。
 
 返回说明：`spy` 方法返回的 `SpyInfo` 记录着函数的调用情况，具体参数见 [返回值SpyInfo说明](#返回值)
