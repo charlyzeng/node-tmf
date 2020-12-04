@@ -1,5 +1,5 @@
 {
-  "name": "node-tfm",
+  "name": "node-tmf",
   "version": "0.0.1",
   "description": "test for module in nodejs.",
   "main": "lib/index.js",
