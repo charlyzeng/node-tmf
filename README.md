@@ -123,7 +123,7 @@ $ npm install node-tmf --save-dev
 
 ## 使用 yarn
 ```shell
-$ yarn add node-tmf
+$ yarn add node-tmf --dev
 ```
 
 # 使用方法
