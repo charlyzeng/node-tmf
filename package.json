@@ -1,6 +1,6 @@
 {
   "name": "node-tmf",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "test for module in nodejs.",
   "main": "lib/index.js",
   "scripts": {
