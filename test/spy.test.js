@@ -5,8 +5,8 @@ const { mul: unconfigurableMul } = require('./cases/unconfigurable');
 const {
   typeErrorMsg,
   unspyableMsg,
-} = require('../src/const');
-const { spy } = require('../src');
+} = require('../lib/const');
+const { spy } = require('../lib');
 
 describe('spy test', () => {
   it('spy for module when exports is function', () => {

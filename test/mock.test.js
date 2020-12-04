@@ -5,8 +5,8 @@ const asyncFunc = require('./cases/async');
 const generatorFunc = require('./cases/generator');
 const deep5 = require('./cases/deep5');
 const deep6 = require('./cases/deep6');
-const { unspyableMsg } = require('../src/const');
-const { mock } = require('../src');
+const { unspyableMsg } = require('../lib/const');
+const { mock } = require('../lib');
 
 describe('mock test', () => {
   it('mock for module when exports is function', () => {

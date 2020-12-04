@@ -1,6 +1,6 @@
 const assert = require('power-assert');
 const deep6 = require('./cases/deep6');
-const { mock } = require('../src');
+const { mock } = require('../lib');
 
 describe('mock test', () => {
   it('TMF_MAX_DEPTH env param should work', () => {
