@@ -10,10 +10,6 @@ function spy(func) {
   ensureSpyable(func);
   // eslint-disable-next-line no-param-reassign
   func[spyFlagKey] = true;
-  // Object.defineProperty(func, spyFlagKey, {
-  //   value: true,
-  //   configurable: true,
-  // });
   return func[spyInfoKey];
 }
 

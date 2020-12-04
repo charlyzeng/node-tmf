@@ -1,5 +1,11 @@
+/**
+ * 注入到每个 commonjs 模块尾部的代码，在此文件的顶级命名空间的所有
+ * 变量均需以`$tmf`开头，以避免命名冲突。
+ */
+
 /* eslint-disable no-param-reassign */
-const $tmfFlagMap = new Map();
+// 记录本模块中每个已被间谍的函数的集合
+const $tmfFlagSet = new WeakSet();
 
 const $tmfMockKey = '__tmfMock';
 const $tmfSpyFlagKey = '__tmfSpyFlag';
@@ -23,7 +29,7 @@ function $tmfGetInitSpyInfo(target) {
     returnValues: [],
     lastReturnValue: undefined,
     restore() {
-      $tmfFlagMap.delete(target);
+      $tmfFlagSet.delete(target);
       delete target[$tmfSpyInfoKey];
       delete target[$tmfMockKey];
     },
@@ -36,7 +42,7 @@ function $tmfWrapFunc(func) {
       const mockFunc = target[$tmfMockKey];
       const funcToCall = mockFunc || target;
       const returnValue = funcToCall.apply(thisArg, args);
-      const isSpied = $tmfFlagMap.get(target);
+      const isSpied = $tmfFlagSet.has(target);
       if (isSpied) {
         const spyInfo = target[$tmfSpyInfoKey];
         spyInfo.called = true;
@@ -51,13 +57,13 @@ function $tmfWrapFunc(func) {
     },
     set(target, prop, value) {
       if (prop === $tmfSpyFlagKey && value === true) {
-        $tmfFlagMap.set(target, true);
+        $tmfFlagSet.add(target);
         Object.defineProperty(target, $tmfSpyInfoKey, {
           value: $tmfGetInitSpyInfo(target),
           configurable: true,
         });
       } else if (prop === $tmfMockKey && $tmfIsFunction(value)) {
-        $tmfFlagMap.set(target, true);
+        $tmfFlagSet.add(target);
         Object.defineProperty(target, $tmfMockKey, {
           value,
           configurable: true,
@@ -71,6 +77,7 @@ function $tmfWrapFunc(func) {
       }
     },
     get(target, prop, receiver) {
+      // 已被 Proxy 包装过的函数，该字段才为 true, 标识函数是否可以被间谍
       if (prop === $tmfSpyableFlag) {
         return true;
       }
