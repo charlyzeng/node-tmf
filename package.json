@@ -6,7 +6,8 @@
   "scripts": {
     "test": "npm run test:common && npm run test:spec",
     "test:common": "mocha -r ./lib/inject.js test/**/*.test.js",
-    "test:spec": "mocha -r ./test/mocha.env.js -r ./lib/inject.js test/**/*.spec.js"
+    "test:spec": "mocha -r ./test/mocha.env.js -r ./lib/inject.js test/**/*.spec.js",
+    "prepublishOnly": "npm run test"
   },
   "repository": {
     "type": "git",
