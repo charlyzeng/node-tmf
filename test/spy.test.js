@@ -1,6 +1,11 @@
 const assert = require('power-assert');
-const sum = require('./mod1');
+const sum = require('./cases/mod1');
 const { mul } = sum;
+const { mul: unconfigurableMul } = require('./cases/unconfigurable');
+const {
+  typeErrorMsg,
+  unspyableMsg,
+} = require('../src/const');
 const { spy } = require('../src');
 
 describe('spy test', () => {
@@ -56,5 +61,41 @@ describe('spy test', () => {
     assert.deepEqual(spyMul.lastCallArgs, [9, 10]);
     assert.deepEqual(spyMul.returnValues, [30, 56, 90]);
     assert.deepEqual(spyMul.lastReturnValue, 90);
+  });
+
+  it('should throw an error when the target function is not exported by module', () => {
+    const sum = function (a, b) {
+      return a + b;
+    };
+    assert.throws(
+      () => spy(sum),
+      {
+        message: unspyableMsg,
+      },
+    );
+  });
+
+  it('should throw an error when the target is not typeof function', () => {
+    assert.throws(
+      () => spy(null),
+      {
+        message: typeErrorMsg,
+      },
+    );
+    assert.throws(
+      () => spy(1),
+      {
+        message: typeErrorMsg,
+      },
+    );
+  });
+
+  it('should throw an error when the target is unconfigurable', () => {
+    assert.throws(
+      () => spy(unconfigurableMul),
+      {
+        message: unspyableMsg,
+      },
+    );
   });
 });

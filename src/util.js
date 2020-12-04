@@ -1,13 +1,17 @@
-const { spyableFlag } = require('./const');
+const {
+  spyableFlag,
+  typeErrorMsg,
+  unspyableMsg,
+} = require('./const');
 
 const { toString } = Object.prototype;
 
 function ensureSpyable(func) {
   if (typeof func !== 'function') {
-    throw new TypeError('the target function must be typeof function');
+    throw new TypeError(typeErrorMsg);
   }
   if (func[spyableFlag] !== true) {
-    throw new Error('the target function can not be spied or mocked, it may because it is not exported by module, or exported with unconfigurable, or exported nest is too deep');
+    throw new Error(unspyableMsg);
   }
   return true;
 }

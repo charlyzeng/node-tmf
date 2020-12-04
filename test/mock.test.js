@@ -1,9 +1,12 @@
 const assert = require('power-assert');
-const sum = require('./mod1');
+const sum = require('./cases/mod1');
 const { mul } = sum;
+const asyncFunc = require('./cases/async');
+const generatorFunc = require('./cases/generator');
+const deep5 = require('./cases/deep5');
+const deep6 = require('./cases/deep6');
+const { unspyableMsg } = require('../src/const');
 const { mock } = require('../src');
-const asyncFunc = require('./async');
-const generatorFunc = require('./generator');
 
 describe('mock test', () => {
   it('mock for module when exports is function', () => {
@@ -91,5 +94,22 @@ describe('mock test', () => {
       done: true,
       value: 3,
     });
+  });
+
+  it('should work when the target depth is 5', () => {
+    assert.equal(deep5.nest1.nest2.nest3.nest4.nest5(), 'nest5');
+    const mockNest5 = mock(deep5.nest1.nest2.nest3.nest4.nest5, () => 'mock nest5');
+    assert.equal(deep5.nest1.nest2.nest3.nest4.nest5(), 'mock nest5');
+    mockNest5.restore();
+    assert.equal(deep5.nest1.nest2.nest3.nest4.nest5(), 'nest5');
+  });
+
+  it('should throw an error when the target depth is 6', () => {
+    assert.throws(
+      () => mock(deep6.nest1.nest2.nest3.nest4.nest5.nest6),
+      {
+        message: unspyableMsg,
+      },
+    );
   });
 });
