@@ -98,7 +98,10 @@ describe('mock test', () => {
 
   it('should work when the target depth is 5', () => {
     assert.equal(deep5.nest1.nest2.nest3.nest4.nest5(), 'nest5');
-    const mockNest5 = mock(deep5.nest1.nest2.nest3.nest4.nest5, () => 'mock nest5');
+    const mockNest5 = mock(
+      deep5.nest1.nest2.nest3.nest4.nest5,
+      () => 'mock nest5',
+    );
     assert.equal(deep5.nest1.nest2.nest3.nest4.nest5(), 'mock nest5');
     mockNest5.restore();
     assert.equal(deep5.nest1.nest2.nest3.nest4.nest5(), 'nest5');
