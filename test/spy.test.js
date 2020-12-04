@@ -7,6 +7,7 @@ describe('spy test', () => {
   it('spy for module when exports is function', () => {
     let spySum = spy(sum);
 
+    assert.equal(spySum.called, false);
     assert.equal(sum(1, 2), 3);
     assert.equal(sum(3, 4), 7);
     assert(spySum.called);
@@ -18,6 +19,7 @@ describe('spy test', () => {
     spySum.restore();
 
     spySum = spy(sum);
+    assert.equal(spySum.called, false);
     assert(sum(5, 6), 11);
     assert(sum(7, 8), 15);
     assert(sum(9, 10), 19);
@@ -32,6 +34,7 @@ describe('spy test', () => {
   it('spy for module when exports[prop] is function', () => {
     let spyMul = spy(mul);
 
+    assert.equal(spyMul.called, false);
     assert.equal(mul(1, 2), 2);
     assert.equal(mul(3, 4), 12);
     assert(spyMul.called);
@@ -43,6 +46,7 @@ describe('spy test', () => {
     spyMul.restore();
 
     spyMul = spy(mul);
+    assert.equal(spyMul.called, false);
     assert(mul(5, 6), 30);
     assert(mul(7, 8), 56);
     assert(mul(9, 10), 90);

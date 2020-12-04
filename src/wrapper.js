@@ -15,7 +15,7 @@ function $tfmIsObject(target) {
 
 function $tfmGetInitSpyInfo(target) {
   return {
-    called: true,
+    called: false,
     callCount: 0,
     callArgs: [],
     lastCallArgs: [],
@@ -38,6 +38,7 @@ function $tfmWrapFunc(func) {
       const isSpied = $tfmFlagMap.get(target);
       if (isSpied) {
         const spyInfo = target[$tfmSpyInfoKey];
+        spyInfo.called = true;
         spyInfo.callCount += 1;
         spyInfo.callArgs.push(args);
         spyInfo.lastCallArgs = args;

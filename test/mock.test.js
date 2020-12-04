@@ -7,6 +7,7 @@ describe('mock test', () => {
   it('mock for module when exports is function', () => {
     const mockSum = mock(sum, (a, b) => a + b + 10);
 
+    assert.equal(mockSum.called, false);
     assert.equal(sum(1, 2), 13);
     assert.equal(sum(3, 4), 17);
     assert(mockSum.called);
@@ -24,6 +25,7 @@ describe('mock test', () => {
   it('mock for module when exports[prop] is function', () => {
     const spyMul = mock(mul, (a, b) => a * b * 10);
 
+    assert.equal(spyMul.called, false);
     assert.equal(mul(1, 2), 20);
     assert.equal(mul(3, 4), 120);
     assert(spyMul.called);
