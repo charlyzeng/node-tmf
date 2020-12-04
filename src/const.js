@@ -1,6 +1,6 @@
-const mockKey = '__tfmMock';
-const spyFlagKey = '__tfmSpyFlag';
-const spyInfoKey = '__tfmSpyInfo';
+const mockKey = '__tmfMock';
+const spyFlagKey = '__tmfSpyFlag';
+const spyInfoKey = '__tmfSpyInfo';
 
 module.exports = {
   mockKey,
