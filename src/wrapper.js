@@ -4,6 +4,7 @@ const $tmfFlagMap = new Map();
 const $tmfMockKey = '__tmfMock';
 const $tmfSpyFlagKey = '__tmfSpyFlag';
 const $tmfSpyInfoKey = '__tmfSpyInfo';
+const $tmfSpyableFlag = '__tmfSpyableFlag';
 
 function $tmfIsFunction(target) {
   return typeof target === 'function';
@@ -68,6 +69,12 @@ function $tmfWrapFunc(func) {
       } else {
         return Reflect.set(target, prop, value);
       }
+    },
+    get(target, prop, receiver) {
+      if (prop === $tmfSpyableFlag) {
+        return true;
+      }
+      return Reflect.get(target, prop, receiver);
     },
   });
 }
